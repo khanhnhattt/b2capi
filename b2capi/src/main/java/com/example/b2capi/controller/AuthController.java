@@ -2,7 +2,7 @@ package com.example.b2capi.controller;
 
 import com.example.b2capi.domain.dto.LoginDTO;
 import com.example.b2capi.domain.dto.RegisterDTO;
-import com.example.b2capi.service.IUserService;
+import com.example.b2capi.service.IAuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.b2capi.controller.base.BaseController;
 
 @RequestMapping("/auth")
 @RestController
-public class AuthController {
+public class AuthController extends BaseController {
 
     @Autowired
-    IUserService userService;
+    IAuthService userService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO registerRequest) {
@@ -33,13 +34,14 @@ public class AuthController {
             return new ResponseEntity<>("Password confirmation does not match", HttpStatus.BAD_REQUEST);
 
         // Add new User to DB
-        userService.addUser(registerRequest);
-        return new ResponseEntity<>("Register successfully", HttpStatus.CREATED);
+//        userService.addUser(registerRequest);
+        return createSuccessResponse("Registered Successfully", userService.addUser(registerRequest));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDto) {
-        userService.login(loginDto);
-        return new ResponseEntity<>("Login to " + loginDto.getEmailOrUsername() + " successfully", HttpStatus.OK);
+        return createSuccessResponse("Logged In Successfully", userService.login(loginDto));
+//        userService.login(loginDto);
+//        return new ResponseEntity<>("Login to " + loginDto.getEmailOrUsername() + " successfully", HttpStatus.OK);
     }
 }

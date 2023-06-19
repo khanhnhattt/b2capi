@@ -2,11 +2,12 @@ package com.example.b2capi.service.impl;
 
 import com.example.b2capi.domain.dto.LoginDTO;
 import com.example.b2capi.domain.dto.RegisterDTO;
+import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.Role;
 import com.example.b2capi.domain.model.User;
 import com.example.b2capi.repository.RoleRepository;
 import com.example.b2capi.repository.UserRepository;
-import com.example.b2capi.service.IUserService;
+import com.example.b2capi.service.IAuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +20,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class UserServiceImpl implements IUserService {
+public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -28,7 +29,7 @@ public class UserServiceImpl implements IUserService {
 
 
     @Override
-    public void addUser(RegisterDTO registerDto) {
+    public MessageResponse addUser(RegisterDTO registerDto) {
         User user = new User();
 
         user.setName(registerDto.getFirstName() + " " + registerDto.getLastName());
@@ -47,6 +48,7 @@ public class UserServiceImpl implements IUserService {
         user.setRoles(Arrays.asList(role));
 
         userRepository.save(user);
+        return MessageResponse.builder().name("User Registered Successfully!").build();
     }
 
     private Role checkRoleExist() {
@@ -81,10 +83,11 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public void login(LoginDTO loginDto) {
+    public MessageResponse login(LoginDTO loginDto) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmailOrUsername(), loginDto.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        return MessageResponse.builder().name("Logged In Successfully!").build();
     }
 
     @Override
