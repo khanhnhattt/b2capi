@@ -3,10 +3,14 @@ package com.example.b2capi.controller.base;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Objects;
 
+@RestControllerAdvice
 public class ControllerExceptionHandler extends BaseController {
     /**
      * Handles exceptions from Controllers
