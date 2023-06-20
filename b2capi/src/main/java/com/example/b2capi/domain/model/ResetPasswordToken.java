@@ -31,4 +31,10 @@ public class ResetPasswordToken {
         this.token = token;
         this.user = user;
     }
+
+    public ResetPasswordToken(String token, User user, LocalDateTime expiry) {
+        this.token = token;
+        this.user = user;
+        this.expiryDate = expiry;
+    }
 }

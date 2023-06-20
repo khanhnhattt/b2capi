@@ -11,11 +11,12 @@ import com.example.b2capi.repository.UserRepository;
 import com.example.b2capi.security.config.JwtUtils;
 import com.example.b2capi.security.service.UserDetailsImpl;
 import com.example.b2capi.service.IAuthService;
-import com.example.b2capi.service.ResetPasswordTokenService;
+import com.example.b2capi.service.IResetPasswordTokenService;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -37,7 +39,7 @@ public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final ResetPasswordTokenService resetPasswordTokenService;
+    private final IResetPasswordTokenService IResetPasswordTokenService;
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
@@ -134,6 +136,8 @@ public class AuthServiceImpl implements IAuthService {
         return userRepository.existsByUsername(username);
     }
 
+    @Value("${context-path}")
+    private String contextPath;
     @Override
     public MessageResponse resetPasswordByEmail(String email) throws AddressException {
         User user = this.findUserByEmail(email);
@@ -141,17 +145,17 @@ public class AuthServiceImpl implements IAuthService {
 
         // Generate token
         String token = UUID.randomUUID().toString();
-        resetPasswordTokenService.createPasswordResetTokenForUser(user, token);
+        IResetPasswordTokenService.createPasswordResetTokenForUser(user, token, LocalDateTime.now().plusMinutes(5));    // expiration time = 5 minutes
 
         // Send token through email
-        mailSender.send(constructResetTokenEmail(request.getContextPath(), request.getLocale(), token, user));
+        mailSender.send(constructResetTokenEmail(contextPath, request.getLocale(), token, user));
 
         return MessageResponse.builder().name("Email sent to "+ email).build();
     }
 
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) throws AddressException {
-        String url = contextPath + "/auth/changePassword?token=" + token;
+        String url = contextPath + "/auth/change_password?token=" + token;
 //        String message = getMessage("message.resetPassword",
 //                null, locale);
         String message = "Link to reset password";
