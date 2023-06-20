@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.aspectj.weaver.ast.Or;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "tel")
+    private String tel;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(
             name = "user_role",
@@ -39,4 +46,7 @@ public class User {
             inverseJoinColumns = {@JoinColumn(name = "ROLE_ID", referencedColumnName = "ID")}
     )
     private List<Role> roles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)    // 1-n to Orders
+    private List<Order> orders;
 }

@@ -45,6 +45,6 @@ public abstract class BaseController {
     public <T> ResponseEntity<?> createFailureResponse(String code, String msg, String desc)
     {
         BaseMessage baseMessage = new BaseMessage(code,false, msg, desc);
-        return new ResponseEntity<>(baseMessage, HttpStatus.valueOf(code));
+        return new ResponseEntity<>(baseMessage, HttpStatus.valueOf(Integer.valueOf(code)));
     }
 }

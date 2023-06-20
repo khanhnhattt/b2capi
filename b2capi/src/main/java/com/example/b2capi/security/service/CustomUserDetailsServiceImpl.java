@@ -34,13 +34,11 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
         if (user != null) {
             if (isValidEmail(username))     // check if username is email
             {
-                return new org.springframework.security.core.userdetails
-                        .User(user.getEmail(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+                return UserDetailsImpl.build(user);
             }
             else    // username is username
             {
-                return new org.springframework.security.core.userdetails
-                        .User(user.getUsername(), user.getPassword(), mapRolesToAuthorities(user.getRoles()));
+                return UserDetailsImpl.build(user);
             }
 
         } else {
