@@ -2,6 +2,7 @@ package com.example.b2capi.controller;
 
 import com.example.b2capi.domain.dto.auth.LoginDTO;
 import com.example.b2capi.domain.dto.auth.RegisterDTO;
+import com.example.b2capi.domain.dto.message.ExtendedMessage;
 import com.example.b2capi.service.IAuthService;
 import com.example.b2capi.service.IResetPasswordTokenService;
 import jakarta.mail.internet.AddressException;
@@ -42,7 +43,7 @@ public class AuthController extends BaseController {
     }
 
     @GetMapping("/forgot_password")
-    public ResponseEntity<?> showChangePasswordPage(@RequestParam("token") String token) {
+    public ResponseEntity<?>  showChangePasswordPage(@RequestParam("token") String token) {
         return createSuccessResponse("Reset Token Valid", resetPasswordTokenService.validateToken(token));      // Stackoverflow recursion
     }
 }
