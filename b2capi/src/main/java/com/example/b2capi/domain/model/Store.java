@@ -28,4 +28,7 @@ public class Store {
 
     @OneToMany(mappedBy = "store")
     private List<ProductStore> productStores;
+
+    @OneToMany(mappedBy = "store")
+    private List<Cart> carts;
 }

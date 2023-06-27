@@ -22,7 +22,7 @@ public class ProductController extends BaseController {
     ICartService cartService;
 
     @PostMapping("/add")
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> addProduct(@RequestBody @Valid NewProductDTO newProductDTO)
     {
         return createSuccessResponse("New Product added successfully!", productService.addProduct(newProductDTO));

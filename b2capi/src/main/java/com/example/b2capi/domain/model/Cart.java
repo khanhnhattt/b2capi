@@ -35,6 +35,8 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
     private Store store;
 
     public Cart(Integer quantity, Long price, Product product, User user) {

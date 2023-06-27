@@ -2,6 +2,7 @@ package com.example.b2capi.repository;
 
 import com.example.b2capi.domain.model.Cart;
 import com.example.b2capi.domain.model.Order;
+import com.example.b2capi.domain.model.Store;
 import com.example.b2capi.domain.model.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,9 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE `b2c`.`cart` SET `order_id` = :orderId WHERE (user_id = :userId);", nativeQuery = true)
     void updateOrderIdByUser(Long orderId, Long userId);
+
+//    @Transactional
+//    @Modifying(clearAutomatically = true)
+//    @Query(value = "UPDATE `b2c`.`cart` SET `store_id` = :store WHERE (`id` = :cart);", nativeQuery = true)
+//    void updateStoreById(Store store, Cart cart);
 }

@@ -17,8 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +28,7 @@ public class CartServiceImpl extends BaseService implements ICartService {
     private final ShipperRepository shipperRepository;
     private final OrderRepository orderRepository;
     private final ProductStoreRepository psRepository;
+    private final StoreRepository storeRepository;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -105,13 +105,9 @@ public class CartServiceImpl extends BaseService implements ICartService {
 
         List<ViewCartDetailsDTO> viewCartDetailsDTO = viewCart();
         // Map ViewCartDetailDTO to Cart
-        List<Cart> carts = viewCartDetailsDTO
-                .stream()
-                .map(vcdDto -> modelMapper.map(vcdDto, Cart.class))
-                .toList();
 
         // Get Storage for order
-        this.getStorage(carts);
+        List<Cart> cartList = this.getStorage();
 
         // Find shipper w/ the least orders
         Optional<Shipper> shipper = shipperRepository.findByLeastOrder();
@@ -122,7 +118,7 @@ public class CartServiceImpl extends BaseService implements ICartService {
                 user.getAddress(),
                 user.getTel(),
                 user,
-                carts,
+                cartList,
                 shipper.get(),
                 ShippingStatus.PROCESSING,
                 OrderStatus.UNCONFIRMED
@@ -136,7 +132,70 @@ public class CartServiceImpl extends BaseService implements ICartService {
         return MessageResponse.builder().name("Order success").build();
     }
 
-    private void getStorage(List<Cart> carts) {
+    private List<Cart> getStorage() {
+        List<Cart> cartList = cartRepository.findAllByUser(getUser());
+        int size = cartList.size();
+        List<Store> stores = storeRepository.findAll();
 
+        while (size > 0) {
+            cartList = cartRepository.findAllByUser(getUser());
+            // Get list of available items in each store
+//            Map<Store, List<Cart>> storeItemsAvailable = getStoreItemsAvailable(carts, stores);
+            Map<Store, List<Cart>> storeItemsAvailable = getStoreItemsAvailable(cartList, stores);
+
+            // Update store w/ the highest items available and update remaining item
+            size -= updateStoreWithLongestItems(storeItemsAvailable);
+
+        }
+
+        return cartRepository.findAllByUser(getUser());
+    }
+
+    private int updateStoreWithLongestItems(Map<Store, List<Cart>> storeItemsAvailable) {
+        Store chosenStore = new Store();
+        List<Cart> carts = new ArrayList<>();
+        int longestSize = 0;
+
+        // Find store w/ the longest items list
+        for (Map.Entry<Store, List<Cart>> entry : storeItemsAvailable.entrySet()) {
+            Store key = entry.getKey();
+            List<Cart> value = entry.getValue();
+            int size = value.size();
+
+            if (size > longestSize) {
+                chosenStore = key;
+                carts = value;
+                longestSize = size;
+            }
+        }
+
+        // Update store in table Cart
+        for (var c : carts) {
+//            cartRepository.updateStoreByCart(chosenStore, c);
+            Optional<Cart> cart = cartRepository.findById(c.getId());
+            cart.get().setStore(chosenStore);
+            cartRepository.save(cart.get());
+        }
+
+        return longestSize;
+
+    }
+
+    private Map<Store, List<Cart>> getStoreItemsAvailable(List<Cart> carts, List<Store> stores) {
+        Map<Store, List<Cart>> storeItemsAvailable = new HashMap<>();
+        for (var s : stores) {
+            List<Cart> cartList = new ArrayList<>();
+            for (var c : carts) {
+                if (c.getStore() == null) {
+                    Optional<Product> p = productRepository.findByName(c.getProduct().getName());
+                    ProductStore ps = psRepository.findByProductAndStore(p.get(), s);
+                    if (ps != null && c.getQuantity() <= ps.getQuantity()) {
+                        cartList.add(c);
+                    }
+                }
+            }
+            storeItemsAvailable.put(s, cartList);
+        }
+        return storeItemsAvailable;
     }
 }
