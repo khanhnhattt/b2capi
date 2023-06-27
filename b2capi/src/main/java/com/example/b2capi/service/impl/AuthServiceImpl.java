@@ -1,11 +1,13 @@
 package com.example.b2capi.service.impl;
 
+import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
 import com.example.b2capi.domain.dto.auth.JwtResponse;
 import com.example.b2capi.domain.dto.auth.LoginDTO;
 import com.example.b2capi.domain.dto.auth.RegisterDTO;
 import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.Role;
 import com.example.b2capi.domain.model.User;
+import com.example.b2capi.repository.ResetPasswordTokenRepository;
 import com.example.b2capi.repository.RoleRepository;
 import com.example.b2capi.repository.UserRepository;
 import com.example.b2capi.security.config.JwtUtils;
@@ -28,10 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 @Service
@@ -39,6 +38,7 @@ public class AuthServiceImpl implements IAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ResetPasswordTokenRepository resetPasswordTokenRepository;
     private final IResetPasswordTokenService IResetPasswordTokenService;
     private final PasswordEncoder encoder;
     private final AuthenticationManager authenticationManager;
@@ -69,7 +69,7 @@ public class AuthServiceImpl implements IAuthService {
         user.setPassword(encoder.encode(registerDto.getPassword()));
 
         // Set role
-        Role role = roleRepository.findByName("ROLE_ADMIN");
+        Role role = roleRepository.findByName("ROLE_USER");
         if (role == null) {
             role = checkRoleExist();
         }
@@ -81,7 +81,7 @@ public class AuthServiceImpl implements IAuthService {
 
     private Role checkRoleExist() {
         Role role = new Role();
-        role.setName("ROLE_ADMIN");
+        role.setName("ROLE_USER");
         return roleRepository.save(role);
     }
 
@@ -153,11 +153,30 @@ public class AuthServiceImpl implements IAuthService {
         return MessageResponse.builder().name("Email sent to "+ email).build();
     }
 
+    @Override
+    public MessageResponse setNewPassword(ResetPasswordDTO resetPasswordDto) {
+        // Check matching password
+        if (!resetPasswordDto.getPassword().equals(resetPasswordDto.getMatchingPassword()))
+            throw new IllegalArgumentException("Password Confirmation Not Matching");
+
+        // Check token available
+        String result = IResetPasswordTokenService.isTokenAvailable(resetPasswordDto.getToken());
+
+        if (result != null) throw new IllegalArgumentException(result);     // Throw exception if token invalid
+
+        User user =  resetPasswordTokenRepository.findByToken(resetPasswordDto.getToken()).getUser();
+        this.updatePassword(user, resetPasswordDto.getPassword());
+        return MessageResponse.builder().build();
+    }
+
+    private void updatePassword(User user, String password) {
+        user.setPassword(encoder.encode(password));
+        userRepository.save(user);
+    }
+
     private SimpleMailMessage constructResetTokenEmail(
             String contextPath, Locale locale, String token, User user) throws AddressException {
         String url = contextPath + "/auth/change_password?token=" + token;
-//        String message = getMessage("message.resetPassword",
-//                null, locale);
         String message = "Link to reset password";
         return constructEmail("Reset Password Link", message + " \r\n" + url, user);
     }

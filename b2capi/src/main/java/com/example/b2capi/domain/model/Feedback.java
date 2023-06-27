@@ -23,8 +23,6 @@ public class Feedback {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_order_id", referencedColumnName = "id")
-    private ProductOrder productOrder;
+    // TO-DO: relationship with other models
 
 }

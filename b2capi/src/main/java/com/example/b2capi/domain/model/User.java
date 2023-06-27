@@ -1,5 +1,6 @@
 package com.example.b2capi.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -49,4 +50,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)    // 1-n to Orders
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)    // 1-n to Carts
+    private List<Cart> carts;
 }

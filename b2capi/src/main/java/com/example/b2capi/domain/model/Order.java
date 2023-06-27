@@ -32,16 +32,12 @@ public class Order {
     @Column(name = "tel")
     private String tel;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private OrderStatus status;
-
     @ManyToOne
     @JoinColumn(name = "user", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)       // 1-n to product_order
-    private List<ProductOrder> productOrders;
+    private List<Cart> carts;
 
     @ManyToOne
     @JoinColumn(name = "shipper_id")
@@ -50,4 +46,8 @@ public class Order {
     @Column(name = "shipping_status")
     @Enumerated(EnumType.STRING)
     private ShippingStatus shippingStatus;
+
+    public Order(User user) {
+        this.user = user;
+    }
 }

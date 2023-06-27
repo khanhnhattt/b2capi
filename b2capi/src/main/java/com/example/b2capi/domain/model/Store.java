@@ -26,11 +26,6 @@ public class Store {
     @Column(name = "location", nullable = false)
     private String location;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "product_store",
-            joinColumns = {@JoinColumn(name = "STORE_ID", referencedColumnName = "ID")},
-            inverseJoinColumns = {@JoinColumn(name = "PRODUCT_ID", referencedColumnName = "ID")}
-    )
-    private List<Product> products = new ArrayList<>();
+    @OneToMany(mappedBy = "store")
+    private List<ProductStore> productStores;
 }

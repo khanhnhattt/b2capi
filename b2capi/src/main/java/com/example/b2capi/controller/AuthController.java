@@ -1,5 +1,6 @@
 package com.example.b2capi.controller;
 
+import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
 import com.example.b2capi.domain.dto.auth.LoginDTO;
 import com.example.b2capi.domain.dto.auth.RegisterDTO;
 import com.example.b2capi.service.IAuthService;
@@ -10,7 +11,6 @@ import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import com.example.b2capi.controller.base.BaseController;
 
@@ -24,7 +24,6 @@ public class AuthController extends BaseController {
 
     @Autowired
     IResetPasswordTokenService resetPasswordTokenService;
-
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody @Valid RegisterDTO registerRequest) {
@@ -44,5 +43,11 @@ public class AuthController extends BaseController {
     @GetMapping("/forgot_password")
     public ResponseEntity<?> showChangePasswordPage(@RequestParam("token") String token) {
         return createSuccessResponse("Reset Token Valid", resetPasswordTokenService.validateToken(token));      // Stackoverflow recursion
+    }
+
+    @PutMapping("/forgot_password")
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid ResetPasswordDTO resetPasswordDto)
+    {
+        return createSuccessResponse("Reset Password Successfully", authService.setNewPassword(resetPasswordDto));
     }
 }

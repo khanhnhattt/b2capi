@@ -1,6 +1,7 @@
 package com.example.b2capi.service;
 
 
+import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
 import com.example.b2capi.domain.dto.auth.JwtResponse;
 import com.example.b2capi.domain.dto.auth.LoginDTO;
 import com.example.b2capi.domain.dto.auth.RegisterDTO;
@@ -24,4 +25,6 @@ public interface IAuthService {
     boolean existsByUsername(String username);
 
     MessageResponse resetPasswordByEmail(String email) throws AddressException;
+
+    MessageResponse setNewPassword(ResetPasswordDTO resetPasswordDto);
 }

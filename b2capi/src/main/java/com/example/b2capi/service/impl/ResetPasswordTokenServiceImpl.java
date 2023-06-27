@@ -1,14 +1,12 @@
 package com.example.b2capi.service.impl;
 
 import com.example.b2capi.controller.base.BaseController;
-import com.example.b2capi.domain.dto.message.BaseMessage;
-import com.example.b2capi.domain.dto.message.ExtendedMessage;
+import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.ResetPasswordToken;
 import com.example.b2capi.domain.model.User;
 import com.example.b2capi.repository.ResetPasswordTokenRepository;
 import com.example.b2capi.service.IResetPasswordTokenService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,23 +23,26 @@ public class ResetPasswordTokenServiceImpl extends BaseController implements IRe
     }
 
     @Override
-    public ExtendedMessage validateToken(String tok) {
-        final ResetPasswordToken token = resetPasswordTokenRepository.findByToken(tok);
+    public MessageResponse validateToken(String tok) {
 
-        String result = !isTokenFound(token) ? "invalidToken"
-                : isTokenExpired(token) ? "expiredToken"
-                : null;
+        String result = isTokenAvailable(tok);
 
         if (result != null)
         {
-            String msg = "Token Invalid or Expired";
-            return new ExtendedMessage(HttpStatus.BAD_REQUEST.name(), false, msg, result, null);
+            throw new IllegalArgumentException("Token Invalid");
         }
         else
         {
-            String msg = "Token Valid";
-            return new ExtendedMessage(HttpStatus.OK.name(), true, msg, null, token);       //
+            return MessageResponse.builder().name(tok).build();
         }
+    }
+
+    public String isTokenAvailable(String tok) {
+        ResetPasswordToken token = resetPasswordTokenRepository.findByToken(tok);
+        String result = !isTokenFound(token) ? "invalidToken"
+                : isTokenExpired(token) ? "expiredToken"
+                : null;
+        return result;
     }
 
     private boolean isTokenExpired(ResetPasswordToken token) {

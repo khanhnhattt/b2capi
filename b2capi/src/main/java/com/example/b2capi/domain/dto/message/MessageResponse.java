@@ -7,6 +7,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageResponse {
-    private String name;
+public class MessageResponse<T> {
+    private T name;
 }

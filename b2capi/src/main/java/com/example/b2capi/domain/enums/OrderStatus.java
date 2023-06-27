@@ -2,7 +2,7 @@ package com.example.b2capi.domain.enums;
 
 public enum OrderStatus {
     ORDER("ORDER"),
-    CHART("CHART");
+    CART("CART");
 
     private String value;
 

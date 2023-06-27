@@ -22,7 +22,7 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "price" ,nullable = false)
+    @Column(name = "price", nullable = false)
     private Long price;
 
     @Column(name = "description", nullable = false)
@@ -35,16 +35,27 @@ public class Product {
     @JoinColumn(name = "product_type_id", nullable = false)
     private ProductType productType;
 
-    @ManyToMany(mappedBy = "products")
-    private List<Store> stores;
-
     @OneToMany(mappedBy = "product")        // 1-n to product_order
-    private List<ProductOrder> productOrders;
-
-//    @OneToMany(mappedBy = "product")    // 1-n to feedback
-//    private List<Feedback> feedbacks;
+    private List<Cart> carts;
 
     @OneToMany(mappedBy = "product")    // 1-n to product_image
     private List<ProductImage> images;
 
+    @OneToMany(mappedBy = "product")
+    private List<ProductStore> productStores;
+
+    public Product(String name, Long price, String desc, ProductType productType, List<ProductStore> productStores) {
+        this.name = name;
+        this.price = price;
+        this.desc = desc;
+        this.productType = productType;
+        this.productStores = productStores;
+    }
+
+    public Product(String name, Long price, String desc, ProductType type) {
+        this.name = name;
+        this.price = price;
+        this.desc = desc;
+        this.productType = type;
+    }
 }
