@@ -35,6 +35,8 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private Store store;
+
     public Cart(Integer quantity, Long price, Product product, User user) {
         this.quantity = quantity;
         this.price = price;

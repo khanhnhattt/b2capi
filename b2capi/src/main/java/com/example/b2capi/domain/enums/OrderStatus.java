@@ -1,8 +1,11 @@
 package com.example.b2capi.domain.enums;
 
 public enum OrderStatus {
-    ORDER("ORDER"),
-    CART("CART");
+    UNCONFIRMED("NOT CONFIRMED YET"),
+    IN_PROCESS("PROCESSING"),
+    DELIVERY("CURRENTLY ON DELIVERY"),
+    DONE("DONE"),
+    CANCELLED("CANCELLED");
 
     private String value;
 

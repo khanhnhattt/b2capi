@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -36,7 +35,7 @@ public class Order {
     @JoinColumn(name = "user", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)       // 1-n to product_order
+    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)       // 1-n to product_order
     private List<Cart> carts;
 
     @ManyToOne
@@ -47,7 +46,18 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private ShippingStatus shippingStatus;
 
-    public Order(User user) {
+    @Column(name = "order_status")
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+
+    public Order(LocalDateTime orderTime, String address, String tel, User user, List<Cart> carts, Shipper shipper, ShippingStatus shippingStatus, OrderStatus orderStatus) {
+        this.orderTime = orderTime;
+        this.address = address;
+        this.tel = tel;
         this.user = user;
+        this.carts = carts;
+        this.shipper = shipper;
+        this.shippingStatus = shippingStatus;
+        this.orderStatus = orderStatus;
     }
 }

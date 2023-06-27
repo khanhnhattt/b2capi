@@ -54,6 +54,14 @@ public class ResetPasswordTokenServiceImpl extends BaseController implements IRe
         }
     }
 
+    public String isTokenAvailable(String tok) {
+        ResetPasswordToken token = resetPasswordTokenRepository.findByToken(tok);
+        String result = !isTokenFound(token) ? "invalidToken"
+                : isTokenExpired(token) ? "expiredToken"
+                : null;
+        return result;
+    }
+
     private boolean isTokenExpired(ResetPasswordToken token) {
         return token.getExpiryDate().isBefore(LocalDateTime.now());
     }

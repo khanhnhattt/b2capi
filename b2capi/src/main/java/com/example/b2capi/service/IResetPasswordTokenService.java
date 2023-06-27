@@ -14,4 +14,6 @@ public interface IResetPasswordTokenService {
     void createPasswordResetTokenForUser(User user, String token, LocalDateTime expiry);
 
     MessageResponse validateToken(String token);
+
+    String isTokenAvailable(String tok);
 }
