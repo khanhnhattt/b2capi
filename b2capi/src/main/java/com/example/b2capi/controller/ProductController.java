@@ -1,7 +1,7 @@
 package com.example.b2capi.controller;
 
 import com.example.b2capi.controller.base.BaseController;
-import com.example.b2capi.domain.dto.AddToCartDTO;
+import com.example.b2capi.domain.dto.auth.AddToCartDTO;
 import com.example.b2capi.domain.dto.NewProductDTO;
 import com.example.b2capi.service.ICartService;
 import com.example.b2capi.service.IProductService;

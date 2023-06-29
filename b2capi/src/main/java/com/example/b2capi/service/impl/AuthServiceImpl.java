@@ -1,9 +1,6 @@
 package com.example.b2capi.service.impl;
 
-import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
-import com.example.b2capi.domain.dto.auth.JwtResponse;
-import com.example.b2capi.domain.dto.auth.LoginDTO;
-import com.example.b2capi.domain.dto.auth.RegisterDTO;
+import com.example.b2capi.domain.dto.auth.*;
 import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.Role;
 import com.example.b2capi.domain.model.User;
@@ -12,13 +9,17 @@ import com.example.b2capi.repository.RoleRepository;
 import com.example.b2capi.repository.UserRepository;
 import com.example.b2capi.security.config.JwtUtils;
 import com.example.b2capi.security.service.UserDetailsImpl;
+import com.example.b2capi.service.BaseService;
 import com.example.b2capi.service.IAuthService;
 import com.example.b2capi.service.IResetPasswordTokenService;
 import jakarta.mail.internet.AddressException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,7 +35,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Service
-public class AuthServiceImpl implements IAuthService {
+public class AuthServiceImpl extends BaseService implements IAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -46,9 +47,12 @@ public class AuthServiceImpl implements IAuthService {
     private final JavaMailSenderImpl mailSender;
     private final HttpServletRequest request;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
 
     @Override
-    public MessageResponse addUser(RegisterDTO registerDto) {
+    public RegisterSuccessDTO addUser(RegisterDTO registerDto) {
         // Check for duplicate username
         if (this.existsByUsername(registerDto.getUsername()))
             throw new IllegalArgumentException("Username " + registerDto.getUsername() + " is already taken");
@@ -64,6 +68,8 @@ public class AuthServiceImpl implements IAuthService {
         user.setName(registerDto.getFirstName() + " " + registerDto.getLastName());
         user.setEmail(registerDto.getEmail());
         user.setUsername(registerDto.getUsername());
+        user.setAddress(registerDto.getAddress());
+        user.setTel(registerDto.getTel());
 
         // Encrypt password using Spring Security
         user.setPassword(encoder.encode(registerDto.getPassword()));
@@ -73,10 +79,11 @@ public class AuthServiceImpl implements IAuthService {
         if (role == null) {
             role = checkRoleExist();
         }
-        user.setRoles(Arrays.asList(role));
+        user.setRoles(List.of(role));
 
         userRepository.save(user);
-        return MessageResponse.builder().name("User Registered Successfully!").build();
+
+        return modelMapper.map(user, RegisterSuccessDTO.class);
     }
 
     private Role checkRoleExist() {
@@ -138,6 +145,7 @@ public class AuthServiceImpl implements IAuthService {
 
     @Value("${context-path}")
     private String contextPath;
+
     @Override
     public MessageResponse resetPasswordByEmail(String email) throws AddressException {
         User user = this.findUserByEmail(email);
@@ -150,7 +158,7 @@ public class AuthServiceImpl implements IAuthService {
         // Send token through email
         mailSender.send(constructResetTokenEmail(contextPath, request.getLocale(), token, user));
 
-        return MessageResponse.builder().name("Email sent to "+ email).build();
+        return MessageResponse.builder().name("Email sent to " + email).build();
     }
 
     @Override
@@ -164,9 +172,56 @@ public class AuthServiceImpl implements IAuthService {
 
         if (result != null) throw new IllegalArgumentException(result);     // Throw exception if token invalid
 
-        User user =  resetPasswordTokenRepository.findByToken(resetPasswordDto.getToken()).getUser();
+        User user = resetPasswordTokenRepository.findByToken(resetPasswordDto.getToken()).getUser();
         this.updatePassword(user, resetPasswordDto.getPassword());
         return MessageResponse.builder().build();
+    }
+
+    @Override
+    public MessageResponse changePassword(ChangePasswordDTO changePasswordDTO) {
+        User user = getUser();
+
+        // Check old password
+        if (!encoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Old Password invalid");
+        }
+
+        // Check matching password
+        if (!changePasswordDTO.getNewPassword().equals(changePasswordDTO.getMatchingPassword())) {
+            throw new IllegalArgumentException("Password Confirmation not matched");
+        }
+
+        // Update
+        updatePassword(user, changePasswordDTO.getNewPassword());
+        return MessageResponse.builder().name("Password changed successfully").build();
+    }
+
+    @Override
+    public ResponseEntity<SuccessEditProfileDTO> editProfile(EditProfileDTO editProfileDTO) {
+        User user = getUser();
+        user.setAddress(editProfileDTO.getAddress());
+        user.setName(editProfileDTO.getName());
+        user.setTel(editProfileDTO.getTel());
+
+        // Check valid username
+        if (!user.getUsername().equals(editProfileDTO.getUsername()) && !this.existsByUsername(editProfileDTO.getUsername()))
+        {
+            user.setUsername(editProfileDTO.getUsername());
+        }
+        else throw new IllegalArgumentException("Username " + editProfileDTO.getUsername() + " is already taken");
+
+        // Check valid email
+        if (!user.getEmail().equals(editProfileDTO.getEmail()) && !this.existsByEmail(editProfileDTO.getEmail()))
+        {
+            user.setEmail(editProfileDTO.getEmail());
+        }
+        else throw new IllegalArgumentException("Email " + editProfileDTO.getEmail() + " is already taken");
+
+
+        userRepository.save(user);
+
+        SuccessEditProfileDTO successEditProfileDTO = modelMapper.map(user, SuccessEditProfileDTO.class);
+        return ResponseEntity.ok().body(successEditProfileDTO);
     }
 
     private void updatePassword(User user, String password) {

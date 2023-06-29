@@ -1,9 +1,6 @@
 package com.example.b2capi.controller;
 
-import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
-import com.example.b2capi.domain.dto.auth.LoginDTO;
-import com.example.b2capi.domain.dto.auth.RegisterDTO;
-import com.example.b2capi.domain.dto.message.ExtendedMessage;
+import com.example.b2capi.domain.dto.auth.*;
 import com.example.b2capi.service.IAuthService;
 import com.example.b2capi.service.IResetPasswordTokenService;
 import jakarta.mail.internet.AddressException;
@@ -51,4 +48,17 @@ public class AuthController extends BaseController {
     {
         return createSuccessResponse("Reset Password Successfully", authService.setNewPassword(resetPasswordDto));
     }
+
+    @PostMapping("/change_password")
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDTO changePasswordDTO)
+    {
+        return createSuccessResponse("Password changed successfully", authService.changePassword(changePasswordDTO));
+    }
+
+    @PutMapping("/edit_profile")
+    public ResponseEntity<SuccessEditProfileDTO> editProfile(@RequestBody EditProfileDTO editProfileDTO)
+    {
+        return authService.editProfile(editProfileDTO);
+    }
+
 }
