@@ -1,0 +1,28 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=b2c_docker
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=123456
+    ports:
+      - 3307:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./b2c.sql:/docker-entrypoint-initdb.d/init.sql
+
+  springboot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8089:8080"
+    depends_on:
+      - mysql
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/b2c
+
+volumes:
+  mysql_data:
