@@ -1,6 +1,6 @@
 package com.example.b2capi.service.impl;
 
-import com.example.b2capi.domain.dto.auth.AddToCartDTO;
+import com.example.b2capi.domain.dto.AddToCartDTO;
 import com.example.b2capi.domain.dto.ViewCartDetailsDTO;
 import com.example.b2capi.domain.dto.ViewCheckoutDTO;
 import com.example.b2capi.domain.dto.message.MessageResponse;
@@ -12,6 +12,7 @@ import com.example.b2capi.repository.*;
 import com.example.b2capi.service.BaseService;
 import com.example.b2capi.service.ICartService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl extends BaseService implements ICartService {
 
     private final CartRepository cartRepository;
@@ -39,6 +41,8 @@ public class CartServiceImpl extends BaseService implements ICartService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        log.info("Product Id found: "+product.getId());
 
         // Calculate newly added price
         Long price = product.getPrice() * addToCartDTO.getQuantity();

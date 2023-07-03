@@ -1,4 +1,4 @@
-package com.example.b2capi.domain.dto.auth;
+package com.example.b2capi.domain.dto;
 
 import jakarta.validation.constraints.Min;
 import lombok.*;

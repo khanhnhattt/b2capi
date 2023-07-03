@@ -85,6 +85,10 @@ public class OrderServiceImpl extends BaseService implements IOrderService {
 
     @Override
     public ChangeShippingSuccessDTO changeShippingStatusById(Long orderId, ShippingStatus shippingStatus) {
+
+        if (ShippingStatus.CANCELLED.equals(shippingStatus) || ShippingStatus.PROCESSING.equals(shippingStatus))
+            throw new IllegalArgumentException("Shipping status input invalid");
+
         Optional<Order> order = orderRepository.findById(orderId);
 
         OrderStatus orderStatus = shippingStatus.equals(ShippingStatus.DELIVERING) ? OrderStatus.DELIVERY : OrderStatus.DONE;
