@@ -1,18 +1,16 @@
 package com.example.b2capi.service;
 
 
-import com.example.b2capi.domain.dto.auth.ResetPasswordDTO;
-import com.example.b2capi.domain.dto.auth.JwtResponse;
-import com.example.b2capi.domain.dto.auth.LoginDTO;
-import com.example.b2capi.domain.dto.auth.RegisterDTO;
+import com.example.b2capi.domain.dto.auth.*;
 import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.User;
 import jakarta.mail.internet.AddressException;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 public interface IAuthService {
-    MessageResponse addUser(RegisterDTO registerDto);
+    RegisterSuccessDTO addUser(RegisterDTO registerDto);
 
     User findUserByEmail(String email);
 
@@ -27,4 +25,8 @@ public interface IAuthService {
     MessageResponse resetPasswordByEmail(String email) throws AddressException;
 
     MessageResponse setNewPassword(ResetPasswordDTO resetPasswordDto);
+
+    MessageResponse changePassword(ChangePasswordDTO changePasswordDTO);
+
+    ResponseEntity<SuccessEditProfileDTO> editProfile(EditProfileDTO editProfileDTO);
 }

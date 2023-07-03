@@ -12,6 +12,7 @@ import com.example.b2capi.repository.*;
 import com.example.b2capi.service.BaseService;
 import com.example.b2capi.service.ICartService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CartServiceImpl extends BaseService implements ICartService {
 
     private final CartRepository cartRepository;
@@ -39,6 +41,8 @@ public class CartServiceImpl extends BaseService implements ICartService {
 
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+
+        log.info("Product Id found: "+product.getId());
 
         // Calculate newly added price
         Long price = product.getPrice() * addToCartDTO.getQuantity();
@@ -72,7 +76,7 @@ public class CartServiceImpl extends BaseService implements ICartService {
     public List<ViewCartDetailsDTO> viewCart() {
         User user = getUser();
 
-        List<Cart> carts = cartRepository.findAllByUser(user);
+        List<Cart> carts = cartRepository.findAllByUserAndOrderIsNull(user);
 
         List<ViewCartDetailsDTO> viewCartDetailsDTOS = carts
                 .stream()
@@ -133,14 +137,14 @@ public class CartServiceImpl extends BaseService implements ICartService {
     }
 
     private List<Cart> getStorage() {
-        List<Cart> cartList = cartRepository.findAllByUser(getUser());
+        List<Cart> cartList = cartRepository.findAllByUserAndOrderIsNull(getUser());
         int size = cartList.size();
         List<Store> stores = storeRepository.findAll();
 
         while (size > 0) {
-            cartList = cartRepository.findAllByUser(getUser());
+            cartList = cartRepository.findAllByUserAndOrderIsNull(getUser());
             // Get list of available items in each store
-//            Map<Store, List<Cart>> storeItemsAvailable = getStoreItemsAvailable(carts, stores);
+
             Map<Store, List<Cart>> storeItemsAvailable = getStoreItemsAvailable(cartList, stores);
 
             // Update store w/ the highest items available and update remaining item
@@ -148,7 +152,7 @@ public class CartServiceImpl extends BaseService implements ICartService {
 
         }
 
-        return cartRepository.findAllByUser(getUser());
+        return cartRepository.findAllByUserAndOrderIsNull(getUser());
     }
 
     private int updateStoreWithLongestItems(Map<Store, List<Cart>> storeItemsAvailable) {

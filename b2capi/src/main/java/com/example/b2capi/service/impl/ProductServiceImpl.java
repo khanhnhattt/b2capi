@@ -1,20 +1,17 @@
 package com.example.b2capi.service.impl;
 
-import com.example.b2capi.domain.dto.AddToCartDTO;
-import com.example.b2capi.domain.dto.NewProductDTO;
-import com.example.b2capi.domain.dto.ProductDetailDTO;
-import com.example.b2capi.domain.dto.StockDTO;
+import com.example.b2capi.domain.dto.*;
 import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.model.Product;
 import com.example.b2capi.domain.model.ProductStore;
 import com.example.b2capi.domain.model.ProductType;
 import com.example.b2capi.domain.model.Store;
-import com.example.b2capi.repository.ProductRepository;
-import com.example.b2capi.repository.ProductStoreRepository;
-import com.example.b2capi.repository.ProductTypeRepository;
-import com.example.b2capi.repository.StoreRepository;
+import com.example.b2capi.repository.*;
 import com.example.b2capi.service.IProductService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -27,6 +24,10 @@ public class ProductServiceImpl implements IProductService {
     private final ProductTypeRepository productTypeRepository;
     private final StoreRepository storeRepository;
     private final ProductStoreRepository productStoreRepository;
+    private final ProductRepositoryCustom productRepositoryCustom;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     public MessageResponse addProduct(NewProductDTO newProductDTO) {
@@ -79,5 +80,43 @@ public class ProductServiceImpl implements IProductService {
         );
 
         return productDetailDTO;
+    }
+
+    @Override
+    public Page<ViewAllProductsDTO> getProductPagination(Integer pageNumber, Integer pageSize, Sort sort) {
+        Pageable pageable = null;
+        if (sort != null) {
+//            pageable = PageRequest.of();
+        } else {
+            pageable = PageRequest.of(pageNumber, pageSize);
+        }
+
+        assert pageable != null;
+        Page<Product> products = productRepository.findAll(pageable);
+
+        List<ViewAllProductsDTO> viewAllProductsDTOS = products
+                .stream()
+                .map(product -> modelMapper.map(product, ViewAllProductsDTO.class))
+                .toList();
+
+        return new PageImpl<>(viewAllProductsDTOS, pageable, viewAllProductsDTOS.size());
+    }
+
+    @Override
+    public Page<ViewAllProductsDTO> getProductSearchPagination(
+            SearchProductDTO searchProductDTO,
+            Integer pageNumber,
+            Integer pageSize) {
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+        List<Product> products = productRepositoryCustom.searchAll(searchProductDTO);
+
+        List<ViewAllProductsDTO> viewAllProductsDTOS = products
+                .stream()
+                .map(product -> modelMapper.map(product, ViewAllProductsDTO.class))
+                .toList();
+
+        return new PageImpl<>(viewAllProductsDTOS, pageable, viewAllProductsDTOS.size());
     }
 }
