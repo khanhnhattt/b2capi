@@ -38,4 +38,12 @@ public class OrderInvoice {
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
+
+    public OrderInvoice(String invoiceNumber, LocalDateTime orderTime, PaymentMethod paymentMethod, PaymentStatus paymentStatus, Order order) {
+        this.invoiceNumber = invoiceNumber;
+        this.date = orderTime;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
+        this.order = order;
+    }
 }

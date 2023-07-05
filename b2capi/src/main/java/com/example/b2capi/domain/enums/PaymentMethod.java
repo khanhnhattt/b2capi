@@ -3,7 +3,7 @@ package com.example.b2capi.domain.enums;
 public enum PaymentMethod {
     COD("COD"),
     VISA("VISA"),
-    INTERNET_BANKING("INTERNET_BANKING");
+    INTERNET_BANKING("IB");
 
     private String value;
 

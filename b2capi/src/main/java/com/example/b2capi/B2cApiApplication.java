@@ -6,9 +6,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class B2capiApplication {
+public class B2cApiApplication {
 	public static void main(String[] args) {
-		SpringApplication.run(B2capiApplication.class, args);
+		SpringApplication.run(B2cApiApplication.class, args);
 	}
 
 }

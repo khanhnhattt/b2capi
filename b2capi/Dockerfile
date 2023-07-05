@@ -1,9 +1,11 @@
-FROM maven:latest
+# Use a base image with OpenJDK 17
+FROM openjdk:17-jdk
 
-# Create workdir
-RUN mkdir "/khanhnhatt"
-WORKDIR /khanhnhatt
-COPY . .
+# Copy the built JAR file from the builder stage to the container
+COPY target/*.jar app.jar
 
-EXPOSE 8080
-CMD [ "mvn", "spring-boot:run" ]
+# Expose the port your application is listening on
+EXPOSE 8089
+
+# Set the entrypoint command to run your application
+CMD ["java", "-jar", "app.jar"]

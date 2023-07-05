@@ -6,6 +6,7 @@ import com.example.b2capi.domain.dto.ViewCheckoutDTO;
 import com.example.b2capi.domain.dto.message.MessageResponse;
 import com.example.b2capi.domain.enums.OrderStatus;
 import com.example.b2capi.domain.enums.PaymentMethod;
+import com.example.b2capi.domain.enums.PaymentStatus;
 import com.example.b2capi.domain.enums.ShippingStatus;
 import com.example.b2capi.domain.model.*;
 import com.example.b2capi.repository.*;
@@ -132,6 +133,20 @@ public class CartServiceImpl extends BaseService implements ICartService {
         // Update orderId in chart
         Long orderId = order.getId();
         cartRepository.updateOrderIdByUser(orderId, getUser().getId());
+
+        // Create new OrderInvoice
+        String invoiceNumber = paymentMethod.getValue()+orderId+user.getId();       // e.g. VISA412
+        PaymentStatus paymentStatus;
+        if (paymentMethod.equals(PaymentMethod.COD))
+        {
+            paymentStatus = PaymentStatus.UNPAID;
+        }
+        else
+        {
+            // Assume payment process is completed
+            paymentStatus = PaymentStatus.PAID;
+        }
+        OrderInvoice invoice = new OrderInvoice(invoiceNumber, order.getOrderTime(), paymentMethod, paymentStatus, order);
 
         return MessageResponse.builder().name("Order success").build();
     }
