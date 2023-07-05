@@ -13,8 +13,9 @@ Follow these steps to set up the project:
 1. Clone the repository.
 2. Navigate to the project directory.
 3. Run `mvn clean install` to build the project and install dependencies.
-4. Configure the database connection in the `application.properties` file.
-5. Run the application using `mvn spring-boot:run`.
+4. Run the database query file b2c.sql
+5. Configure the database connection in the `application.properties` file.
+6. Run the application using `mvn spring-boot:run`.
 
 ## Usage
 - The API endpoints and their respective request/response formats are documented using Swagger.
